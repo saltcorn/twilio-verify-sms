@@ -1,0 +1,17 @@
+{
+  "name": "@saltcorn/twilio-verify-sms",
+  "version": "0.1.0",
+  "description": "Verify accounts with Twilio",
+  "main": "index.js",
+  "dependencies": {
+    "@saltcorn/markup": "^0.5.1",
+    "@saltcorn/data": "^0.5.1",
+    "twilio": "^3.66.1"
+  },
+  "author": "Tom Nielsen",
+  "license": "MIT",
+  "repository": "github:saltcorn/twilio-verify-sms",
+  "publishConfig": {
+    "access": "public"
+  }
+}
