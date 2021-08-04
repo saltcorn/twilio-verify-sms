@@ -19,7 +19,7 @@ const configuration_workflow = () =>
           const userFields = (await userTable.getFields())
             .filter((f) => !f.calculated && f.name !== "id")
             .map((f) => ({ value: f.name, label: f.name }));
-          console.log(userFields);
+          //console.log(userFields);
           return new Form({
             fields: [
               {
@@ -56,7 +56,9 @@ const configuration_workflow = () =>
       },
     ],
   });
-const verifier_workflow = ({ accountSid, authToken, phoneField }) => async (user) => {
+const verifier_workflow = ({ accountSid, authToken, phoneField }) => async (
+  user
+) => {
   const client = require("twilio")(accountSid, authToken);
   const userRow = await User.findOne({ id: user.id });
 
@@ -64,8 +66,11 @@ const verifier_workflow = ({ accountSid, authToken, phoneField }) => async (user
     onDone: async ({ verify_token }) => {
       const verification_check = await client.verify
         .services(service.sid)
-        .verificationChecks.create({ to: userRow[phoneField], code: verify_token });
-      console.log(verification_check);
+        .verificationChecks.create({
+          to: userRow[phoneField],
+          code: verify_token,
+        });
+      //console.log(verification_check);
       return { verified: verification_check.valid };
     },
     steps: [
