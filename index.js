@@ -51,7 +51,7 @@ const verifier_workflow = ({ accountSid, authToken }) => async (user) => {
       {
         name: "Twilio Account",
         form: async () => {
-          console.log({to: userRow.phone, channel: "sms", user, userRow});
+          //console.log({to: userRow.phone, channel: "sms", user, userRow});
           const verification = await client.verify
             .services(service.sid)
             .verifications.create({ to: userRow.phone, channel: "sms" }); 
