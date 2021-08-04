@@ -1,7 +1,7 @@
 const Workflow = require("@saltcorn/data/models/workflow");
 const Form = require("@saltcorn/data/models/form");
 const User = require("@saltcorn/data/models/user");
-const Trigger = require("@saltcorn/data/models/trigger");
+const Table = require("@saltcorn/data/models/table");
 
 let service;
 
@@ -15,6 +15,11 @@ const configuration_workflow = () =>
       {
         name: "Twilio Account",
         form: async () => {
+          const userTable = await Table.findOne({ name: "users" });
+          const userFields = (await userTable.getFields())
+            .filter((f) => !f.calculated && f.name !== "id")
+            .map((f) => ({ value: f.name, label: f.name }));
+          console.log(userFields);
           return new Form({
             fields: [
               {
@@ -29,13 +34,29 @@ const configuration_workflow = () =>
                 type: "String",
                 required: true,
               },
+              {
+                name: "friendlyName",
+                label: "Friendly name",
+                type: "String",
+                sublabel: "The name of your service shown to your users",
+                required: true,
+              },
+              {
+                name: "phoneField",
+                label: "Phone field",
+                input_type: "select",
+                sublabel:
+                  "The field in the user table containing the phone number",
+                options: userFields,
+                required: true,
+              },
             ],
           });
         },
       },
     ],
   });
-const verifier_workflow = ({ accountSid, authToken }) => async (user) => {
+const verifier_workflow = ({ accountSid, authToken, phoneField }) => async (user) => {
   const client = require("twilio")(accountSid, authToken);
   const userRow = await User.findOne({ id: user.id });
 
@@ -43,8 +64,8 @@ const verifier_workflow = ({ accountSid, authToken }) => async (user) => {
     onDone: async ({ verify_token }) => {
       const verification_check = await client.verify
         .services(service.sid)
-        .verificationChecks.create({ to: userRow.phone, code: verify_token });
-      console.log(verification_check); 
+        .verificationChecks.create({ to: userRow[phoneField], code: verify_token });
+      console.log(verification_check);
       return { verified: verification_check.valid };
     },
     steps: [
@@ -54,7 +75,7 @@ const verifier_workflow = ({ accountSid, authToken }) => async (user) => {
           //console.log({to: userRow.phone, channel: "sms", user, userRow});
           const verification = await client.verify
             .services(service.sid)
-            .verifications.create({ to: userRow.phone, channel: "sms" }); 
+            .verifications.create({ to: userRow[phoneField], channel: "sms" });
           return new Form({
             fields: [
               {
@@ -71,10 +92,10 @@ const verifier_workflow = ({ accountSid, authToken }) => async (user) => {
   });
 };
 
-const onLoad = async ({ accountSid, authToken }) => {
+const onLoad = async ({ accountSid, authToken, friendlyName }) => {
   const client = require("twilio")(accountSid, authToken);
   service = await client.verify.services.create({
-    friendlyName: "My First Verify Service",
+    friendlyName,
   });
 };
 
