@@ -112,6 +112,7 @@ const verifier_workflow =
 const onLoad = async (cfg) => {
   if (!cfg) return;
   const { accountSid, authToken, friendlyName, bypass } = cfg;
+  if (!accountSid || !authToken) return;
   if (bypass) return;
   const client = require("twilio")(accountSid, authToken);
   service = await client.verify.services.create({

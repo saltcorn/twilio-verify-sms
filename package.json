@@ -1,6 +1,6 @@
 {
   "name": "@saltcorn/twilio-verify-sms",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Verify accounts with Twilio",
   "main": "index.js",
   "dependencies": {
