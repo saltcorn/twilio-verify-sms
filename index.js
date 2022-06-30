@@ -63,56 +63,55 @@ const configuration_workflow = () =>
       },
     ],
   });
-const verifier_workflow = ({
-  accountSid,
-  authToken,
-  phoneField,
-  bypass,
-}) => async (user) => {
-  const client = !bypass && require("twilio")(accountSid, authToken);
-  const userRow = await User.findOne({ id: user.id });
+const verifier_workflow =
+  ({ accountSid, authToken, phoneField, bypass }) =>
+  async (user) => {
+    const client = !bypass && require("twilio")(accountSid, authToken);
+    const userRow = await User.findOne({ id: user.id });
 
-  return new Workflow({
-    onDone: async ({ verify_token }) => {
-      if (bypass) return { verified: true };
-      const verification_check = await client.verify
-        .services(service.sid)
-        .verificationChecks.create({
-          to: userRow[phoneField],
-          code: verify_token,
-        });
-      //console.log(verification_check);
-      return { verified: verification_check.valid };
-    },
-    steps: [
-      {
-        name: "Twilio Account",
-        form: async () => {
-          //console.log({to: userRow.phone, channel: "sms", user, userRow});
-          if (!bypass)
-            await client.verify.services(service.sid).verifications.create({
-              to: userRow[phoneField],
-              channel: "sms",
-            });
-          const form = new Form({
-            fields: [
-              {
-                name: "verify_token",
-                label: "Verification token",
-                type: "String",
-                required: true,
-              },
-            ],
+    return new Workflow({
+      onDone: async ({ verify_token }) => {
+        if (bypass) return { verified: true };
+        const verification_check = await client.verify
+          .services(service.sid)
+          .verificationChecks.create({
+            to: userRow[phoneField],
+            code: verify_token,
           });
-          if (bypass) form.values.verify_token = "000000";
-          return form;
-        },
+        //console.log(verification_check);
+        return { verified: verification_check.valid };
       },
-    ],
-  });
-};
+      steps: [
+        {
+          name: "Twilio Account",
+          form: async () => {
+            //console.log({to: userRow.phone, channel: "sms", user, userRow});
+            if (!bypass)
+              await client.verify.services(service.sid).verifications.create({
+                to: userRow[phoneField],
+                channel: "sms",
+              });
+            const form = new Form({
+              fields: [
+                {
+                  name: "verify_token",
+                  label: "Verification token",
+                  type: "String",
+                  required: true,
+                },
+              ],
+            });
+            if (bypass) form.values.verify_token = "000000";
+            return form;
+          },
+        },
+      ],
+    });
+  };
 
-const onLoad = async ({ accountSid, authToken, friendlyName, bypass }) => {
+const onLoad = async (cfg) => {
+  if (!cfg) return;
+  const { accountSid, authToken, friendlyName, bypass } = cfg;
   if (bypass) return;
   const client = require("twilio")(accountSid, authToken);
   service = await client.verify.services.create({
