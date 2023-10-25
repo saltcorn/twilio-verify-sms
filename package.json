@@ -1,6 +1,6 @@
 {
   "name": "@saltcorn/twilio-verify-sms",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Verify accounts with Twilio",
   "main": "index.js",
   "dependencies": {
@@ -13,5 +13,8 @@
   "repository": "github:saltcorn/twilio-verify-sms",
   "publishConfig": {
     "access": "public"
+  },
+  "overrides": {
+    "axios": "0.16.2"
   }
 }
