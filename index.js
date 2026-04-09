@@ -133,5 +133,11 @@ module.exports = {
       isAsync: false,
       arguments: [],
     },
+    get_twilio: {
+      run: () => require("twilio"),
+      description: "Get the Twilio library",
+      isAsync: false,
+      arguments: [],
+    },
   }),
 };
