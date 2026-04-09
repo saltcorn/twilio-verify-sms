@@ -4,6 +4,7 @@ const User = require("@saltcorn/data/models/user");
 const Table = require("@saltcorn/data/models/table");
 
 let service;
+let client;
 
 const configuration_workflow = () =>
   new Workflow({
@@ -113,8 +114,8 @@ const onLoad = async (cfg) => {
   if (!cfg) return;
   const { accountSid, authToken, friendlyName, bypass } = cfg;
   if (!accountSid || !authToken) return;
+  client = require("twilio")(accountSid, authToken);
   if (bypass) return;
-  const client = require("twilio")(accountSid, authToken);
   service = await client.verify.services.create({
     friendlyName,
   });
@@ -125,4 +126,12 @@ module.exports = {
   configuration_workflow,
   verifier_workflow,
   onLoad,
+  functions: () => ({
+    get_twilio_client: {
+      run: () => client,
+      description: "Get the Twilio client object",
+      isAsync: false,
+      arguments: [],
+    },
+  }),
 };
